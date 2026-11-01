@@ -38,7 +38,11 @@ Three files, no framework, no bundler:
 
 ### Game flow
 
-`init()` → `spawn()` → `requestAnimationFrame(loop)`. Each frame: accumulate dt → auto-drop or `lockPiece()` → `draw()`. `lockPiece()` = `merge()` + `clearLines()` + `spawn()`. If `spawn()` immediately collides → `endGame()`.
+On load, `showOverlay('start')` shows the start screen with the records; `init()` runs on "Jugar"/Enter. `init()` → `spawn()` → `requestAnimationFrame(loop)`. Each frame: accumulate dt → auto-drop or `lockPiece()` → `draw()`. `lockPiece()` = `merge()` + `clearLines()` + `spawn()`. If `spawn()` immediately collides → `endGame()`.
+
+### Records
+
+Stored in `localStorage['tetris-records']` as `{ scores: [top 5 {name, score, lines, level, date}], bestCombo, maxLines }`. `combo` counts consecutive locks that clear lines. At game over `rankFor(score)` sets `pendingRank`; the name form saves the score with `savePendingScore()`, and "Reiniciar" also saves it if the player skipped the form. The shared overlay switches between `'start' | 'pause' | 'gameover'` through `showOverlay(mode)`.
 
 ## Tunable constants (top of game.js)
 
