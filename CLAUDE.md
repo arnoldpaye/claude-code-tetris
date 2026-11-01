@@ -30,9 +30,11 @@ Three files, no framework, no bundler:
 | Game loop | `loop(ts)` via `requestAnimationFrame`; `dropAccum` tracks elapsed ms against `dropInterval` |
 | Line clear | `clearLines()` — iterates board bottom-up, splices full rows, prepends empty row |
 | Scoring | `LINE_SCORES = [0,100,300,500,800]` × `level`; hard drop +2/cell, soft drop +1/row |
-| Speed | `dropInterval = max(100, 1000 − (level−1) × 90)` ms; level = `floor(lines/10) + 1` |
+| Speed | `dropInterval = max(100, 1000 − (level−1) × 90)` ms; level = `startLevel + floor(lines/10)`; `startLevel` (1–10) is chosen in the pause menu and persisted in `localStorage` (`tetris-start-level`) |
 | Ghost piece | `ghostY()` — projects current piece down until collision; drawn at `globalAlpha = 0.2` |
 | State flags | `paused`, `gameOver`, `animId` (RAF handle) |
+| Pause menu | `openPauseMenu()` / `resumeGame()` / `restartGame()`; `showView()` switches `#pause-view` / `#controls-view` / `#gameover-view` inside `#overlay`; `handleMenuKey()` gets all keys while the overlay is open |
+| Input lock | `pressedKeys` + `blockedKeys`: keys still held when the menu closes are ignored until released |
 
 ### Game flow
 

@@ -29,6 +29,9 @@ const PIECES = [
 ];
 
 const LINE_SCORES = [0, 100, 300, 500, 800];
+const MIN_START_LEVEL = 1;
+const MAX_START_LEVEL = 10;
+const START_LEVEL_KEY = 'tetris-start-level';
 
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
@@ -41,8 +44,36 @@ const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
+const gameoverView = document.getElementById('gameover-view');
+const pauseView = document.getElementById('pause-view');
+const controlsView = document.getElementById('controls-view');
+const resumeBtn = document.getElementById('resume-btn');
+const pauseRestartBtn = document.getElementById('pause-restart-btn');
+const controlsBtn = document.getElementById('controls-btn');
+const controlsBackBtn = document.getElementById('controls-back-btn');
+const levelDownBtn = document.getElementById('level-down');
+const levelUpBtn = document.getElementById('level-up');
+const startLevelValue = document.getElementById('start-level-value');
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
+
+// Nivel con el que empieza la próxima partida (persistido entre sesiones).
+let startLevel = clampLevel(parseInt(localStorage.getItem(START_LEVEL_KEY), 10));
+
+// Teclas físicamente pulsadas, y teclas bloqueadas hasta que se suelten.
+// Al cerrar el menú, todo lo que siga pulsado queda bloqueado para que no
+// se traduzca en un movimiento accidental al volver al juego.
+const pressedKeys = new Set();
+let blockedKeys = new Set();
+
+function clampLevel(n) {
+  if (!Number.isFinite(n)) return MIN_START_LEVEL;
+  return Math.min(MAX_START_LEVEL, Math.max(MIN_START_LEVEL, n));
+}
+
+function intervalForLevel(lvl) {
+  return Math.max(100, 1000 - (lvl - 1) * 90);
+}
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -108,8 +139,8 @@ function clearLines() {
   if (cleared) {
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
-    level = Math.floor(lines / 10) + 1;
-    dropInterval = Math.max(100, 1000 - (level - 1) * 90);
+    level = startLevel + Math.floor(lines / 10);
+    dropInterval = intervalForLevel(level);
     updateHUD();
   }
 }
@@ -220,25 +251,119 @@ function drawNext() {
       drawBlock(nextCtx, offX + c, offY + r, shape[r][c], NB);
 }
 
+function showView(view) {
+  for (const v of [gameoverView, pauseView, controlsView])
+    v.classList.toggle('hidden', v !== view);
+}
+
 function endGame() {
   gameOver = true;
   cancelAnimationFrame(animId);
   overlayTitle.textContent = 'GAME OVER';
   overlayScore.textContent = `Puntuación: ${score.toLocaleString()}`;
+  showView(gameoverView);
   overlay.classList.remove('hidden');
+  restartBtn.focus();
 }
 
-function togglePause() {
-  if (gameOver) return;
-  paused = !paused;
-  if (!paused) {
-    lastTime = performance.now();
-    loop(lastTime);
-  } else {
-    cancelAnimationFrame(animId);
-    overlayTitle.textContent = 'PAUSA';
-    overlayScore.textContent = '';
-    overlay.classList.remove('hidden');
+function openPauseMenu() {
+  if (gameOver || paused) return;
+  paused = true;
+  cancelAnimationFrame(animId);
+  overlayTitle.textContent = 'PAUSA';
+  overlayScore.textContent = '';
+  updateLevelPicker();
+  showView(pauseView);
+  overlay.classList.remove('hidden');
+  resumeBtn.focus();
+}
+
+function releaseMenuFocus() {
+  // Quitar el foco del botón evita que Space/Enter lo vuelvan a activar
+  // durante la partida.
+  if (overlay.contains(document.activeElement)) document.activeElement.blur();
+  blockedKeys = new Set(pressedKeys);
+}
+
+function resumeGame() {
+  if (!paused || gameOver) return;
+  paused = false;
+  overlay.classList.add('hidden');
+  releaseMenuFocus();
+  lastTime = performance.now();
+  animId = requestAnimationFrame(loop);
+}
+
+function restartGame() {
+  releaseMenuFocus();
+  init();
+}
+
+function showControls() {
+  overlayTitle.textContent = 'CONTROLES';
+  showView(controlsView);
+  controlsBackBtn.focus();
+}
+
+function hideControls() {
+  overlayTitle.textContent = 'PAUSA';
+  showView(pauseView);
+  controlsBtn.focus();
+}
+
+function setStartLevel(n) {
+  startLevel = clampLevel(n);
+  localStorage.setItem(START_LEVEL_KEY, String(startLevel));
+  updateLevelPicker();
+}
+
+function updateLevelPicker() {
+  startLevelValue.textContent = startLevel;
+  levelDownBtn.disabled = startLevel <= MIN_START_LEVEL;
+  levelUpBtn.disabled = startLevel >= MAX_START_LEVEL;
+}
+
+function visibleMenuButtons() {
+  const view = [pauseView, controlsView, gameoverView].find(v => !v.classList.contains('hidden'));
+  return view ? [...view.querySelectorAll('button:not(:disabled)')] : [];
+}
+
+function moveMenuFocus(delta) {
+  const items = visibleMenuButtons();
+  if (!items.length) return;
+  const idx = items.indexOf(document.activeElement);
+  const nextIdx = idx === -1 ? 0 : (idx + delta + items.length) % items.length;
+  items[nextIdx].focus();
+}
+
+// Teclado mientras el overlay está abierto: ninguna tecla llega al juego.
+// Enter / Space los gestiona de forma nativa el botón enfocado.
+function handleMenuKey(e) {
+  const inControls = !controlsView.classList.contains('hidden');
+  switch (e.code) {
+    case 'Escape':
+      e.preventDefault();
+      if (gameOver) return;
+      if (inControls) hideControls(); else resumeGame();
+      break;
+    case 'KeyP':
+      if (!gameOver) resumeGame();
+      break;
+    case 'ArrowUp':
+    case 'ArrowDown':
+      e.preventDefault();
+      moveMenuFocus(e.code === 'ArrowDown' ? 1 : -1);
+      break;
+    case 'ArrowLeft':
+    case 'ArrowRight':
+      e.preventDefault();
+      if (!gameOver && !inControls && document.activeElement?.closest('.level-picker')) {
+        setStartLevel(startLevel + (e.code === 'ArrowRight' ? 1 : -1));
+        // Si el botón enfocado acaba de deshabilitarse, pasar el foco al otro.
+        if (document.activeElement?.disabled || !document.activeElement?.closest('.level-picker'))
+          (levelDownBtn.disabled ? levelUpBtn : levelDownBtn).focus();
+      }
+      break;
   }
 }
 
@@ -263,22 +388,33 @@ function init() {
   board = createBoard();
   score = 0;
   lines = 0;
-  level = 1;
+  level = startLevel;
   paused = false;
   gameOver = false;
-  dropInterval = 1000;
+  dropInterval = intervalForLevel(level);
   dropAccum = 0;
   lastTime = performance.now();
   next = randomPiece();
   spawn();
   updateHUD();
   overlay.classList.add('hidden');
+  showView(gameoverView);
   cancelAnimationFrame(animId);
   animId = requestAnimationFrame(loop);
 }
 
 document.addEventListener('keydown', e => {
-  if (e.code === 'KeyP') { togglePause(); return; }
+  pressedKeys.add(e.code);
+
+  if (!overlay.classList.contains('hidden')) { handleMenuKey(e); return; }
+
+  // Tecla que seguía pulsada al cerrar el menú: ignorar hasta soltarla.
+  if (blockedKeys.has(e.code)) {
+    if (e.code === 'Space') e.preventDefault();
+    return;
+  }
+
+  if (e.code === 'KeyP' || e.code === 'Escape') { openPauseMenu(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
     case 'ArrowLeft':
@@ -302,7 +438,24 @@ document.addEventListener('keydown', e => {
   updateHUD();
 });
 
-restartBtn.addEventListener('click', init);
+document.addEventListener('keyup', e => {
+  pressedKeys.delete(e.code);
+  blockedKeys.delete(e.code);
+});
+
+// Sin foco no llegan los keyup: limpiar para no dejar teclas "atascadas".
+window.addEventListener('blur', () => {
+  pressedKeys.clear();
+  blockedKeys.clear();
+});
+
+restartBtn.addEventListener('click', restartGame);
+pauseRestartBtn.addEventListener('click', restartGame);
+resumeBtn.addEventListener('click', resumeGame);
+controlsBtn.addEventListener('click', showControls);
+controlsBackBtn.addEventListener('click', hideControls);
+levelDownBtn.addEventListener('click', () => setStartLevel(startLevel - 1));
+levelUpBtn.addEventListener('click', () => setStartLevel(startLevel + 1));
 
 const themeToggle = document.getElementById('theme-toggle');
 const toggleIcon = themeToggle.querySelector('.toggle-icon');
