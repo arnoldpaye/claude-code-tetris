@@ -151,6 +151,48 @@ body {
   transition: background 0.25s, border-color 0.25s;
 }
 
+/* ---- Selector de skin ---- */
+.skin-select {
+  background: var(--kbd-bg);
+  border: 1px solid var(--kbd-border);
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 13px;
+  font-family: 'Courier New', Courier, monospace;
+  color: var(--kbd-text);
+  cursor: pointer;
+  transition: background 0.25s, color 0.25s, border-color 0.25s;
+}
+
+.skin-select:hover,
+.skin-select:focus {
+  border-color: #7aa2f7;
+  outline: none;
+}
+
+/* ---- Skins (declarados después de light-mode para tener prioridad) ---- */
+body.skin-neon {
+  --canvas-bg: #000;
+  --grid-line: #14141f;
+}
+
+body.skin-neon #board,
+body.skin-neon #next-canvas {
+  border-color: #00f0ff;
+  box-shadow: 0 0 18px rgba(0, 240, 255, 0.45), inset 0 0 12px rgba(0, 240, 255, 0.15);
+}
+
+body.skin-pastel #board,
+body.skin-pastel #next-canvas {
+  border-radius: 12px;
+}
+
+body.skin-pixel #board,
+body.skin-pixel #next-canvas {
+  border-radius: 0;
+  border-width: 3px;
+}
+
 /* ---- Controles ---- */
 .controls ul {
   list-style: none;

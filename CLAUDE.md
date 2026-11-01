@@ -35,6 +35,7 @@ Three files, no framework, no bundler:
 | State flags | `paused`, `gameOver`, `animId` (RAF handle) |
 | Pause menu | `openPauseMenu()` / `resumeGame()` / `restartGame()`; `showView()` switches `#pause-view` / `#controls-view` / `#gameover-view` inside `#overlay`; `handleMenuKey()` gets all keys while the overlay is open |
 | Input lock | `pressedKeys` + `blockedKeys`: keys still held when the menu closes are ignored until released |
+| Skins | `SKINS` — `{ label, colors, drawBlock(ctx, px, py, size, color) }` per skin (retro, neon, pastel, pixel); `applySkin(key)` swaps `skin`/`COLORS`, sets `body.skin-<key>` and redraws; persisted in `localStorage['tetris-skin']` |
 
 ### Game flow
 
@@ -46,4 +47,4 @@ Stored in `localStorage['tetris-records']` as `{ scores: [top 5 {name, score, li
 
 ## Tunable constants (top of game.js)
 
-`COLS` (10), `ROWS` (20), `BLOCK` (30 px), `COLORS` (array indexed 1–7), `LINE_SCORES`. If you change `COLS`/`ROWS`/`BLOCK`, update the canvas `width`/`height` attributes in `index.html` to match (`COLS×BLOCK` and `ROWS×BLOCK`).
+`COLS` (10), `ROWS` (20), `BLOCK` (30 px), per-skin `colors` arrays in `SKINS` (indexed 1–8; `COLORS` points at the active one), `LINE_SCORES`. If you change `COLS`/`ROWS`/`BLOCK`, update the canvas `width`/`height` attributes in `index.html` to match (`COLS×BLOCK` and `ROWS×BLOCK`).
