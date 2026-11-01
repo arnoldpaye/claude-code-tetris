@@ -235,6 +235,45 @@ kbd {
   background: #9bbdff;
 }
 
+/* ==== skins ==== */
+.skin-select {
+  background: var(--kbd-bg);
+  border: 1px solid var(--kbd-border);
+  border-radius: 4px;
+  color: var(--kbd-text);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  letter-spacing: 1px;
+  padding: 4px 6px;
+  cursor: pointer;
+  transition: background 0.25s, color 0.25s, border-color 0.25s;
+}
+
+.skin-select:hover,
+.skin-select:focus {
+  border-color: #7aa2f7;
+  outline: none;
+}
+
+/* Neon: canvas siempre negro con borde brillante */
+body.skin-neon #board,
+body.skin-neon #next-canvas {
+  background: #000;
+  border-color: #00f0ff;
+  box-shadow: 0 0 18px rgba(0, 240, 255, 0.35);
+}
+
+body.skin-pastel #board,
+body.skin-pastel #next-canvas {
+  border-radius: 8px;
+}
+
+body.skin-pixel #board,
+body.skin-pixel #next-canvas {
+  border-radius: 0;
+  border-width: 3px;
+  image-rendering: pixelated;
+}
 /* ==== highscores ==== */
 #hs-gameover.hidden,
 #hs-entry.hidden { display: none; }
