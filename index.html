@@ -48,11 +48,39 @@
       </aside>
     </div>
 
-    <div id="overlay" class="overlay hidden">
+    <div id="overlay" class="overlay">
       <div class="overlay-box">
-        <p id="overlay-title">GAME OVER</p>
+        <p id="overlay-title">TETRIS</p>
         <p id="overlay-score"></p>
-        <button id="restart-btn">Reiniciar</button>
+        <p id="new-record-msg" class="new-record hidden"></p>
+
+        <form id="name-form" class="name-form hidden" autocomplete="off">
+          <input id="player-name" type="text" maxlength="12" placeholder="Tu nombre" spellcheck="false" />
+          <button type="submit">Guardar</button>
+        </form>
+
+        <div id="records" class="records hidden">
+          <span class="label">MEJORES PUNTUACIONES</span>
+          <table class="records-table">
+            <thead>
+              <tr><th>#</th><th>NOMBRE</th><th>PUNTOS</th><th>LÍNEAS</th></tr>
+            </thead>
+            <tbody id="records-body"></tbody>
+          </table>
+          <div class="records-stats">
+            <div class="stat" id="stat-combo">
+              <span class="label">MEJOR COMBO</span>
+              <span class="stat-value" id="best-combo">0</span>
+            </div>
+            <div class="stat" id="stat-lines">
+              <span class="label">LÍNEAS MÁX.</span>
+              <span class="stat-value" id="max-lines">0</span>
+            </div>
+          </div>
+          <button id="reset-records-btn" class="link-btn" type="button">Borrar records</button>
+        </div>
+
+        <button id="restart-btn" type="button">Jugar</button>
       </div>
     </div>
   </div>
