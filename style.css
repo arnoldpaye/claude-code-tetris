@@ -354,6 +354,8 @@ kbd {
   font-size: 11px;
   color: var(--label);
   margin-top: 2px;
+}
+
 /* ==== skins ==== */
 .skin-select {
   background: var(--kbd-bg);
