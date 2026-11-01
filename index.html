@@ -42,7 +42,7 @@
             <li><kbd>↑</kbd> rotar</li>
             <li><kbd>↓</kbd> bajar</li>
             <li><kbd>Space</kbd> caída</li>
-            <li><kbd>P</kbd> pausa</li>
+            <li><kbd>P</kbd><kbd>Esc</kbd> pausa</li>
           </ul>
         </div>
       </aside>
@@ -55,8 +55,35 @@
         <button id="restart-btn">Reiniciar</button>
       </div>
     </div>
+    <!-- [pause-menu] -->
+    <div id="pause-menu" class="overlay pause-menu hidden" role="dialog" aria-modal="true" aria-labelledby="pm-title">
+      <div class="pm-box">
+        <p id="pm-title" class="pm-title">PAUSA</p>
+        <button type="button" class="pm-item" data-action="resume">Reanudar</button>
+        <button type="button" class="pm-item" data-action="restart">Reiniciar</button>
+        <button type="button" class="pm-item" data-action="controls" aria-expanded="false" aria-controls="pm-controls">Ver controles</button>
+        <ul id="pm-controls" class="pm-controls" hidden>
+          <li><span><kbd>&larr;</kbd><kbd>&rarr;</kbd></span> mover</li>
+          <li><span><kbd>&uarr;</kbd><kbd>X</kbd></span> rotar</li>
+          <li><span><kbd>&darr;</kbd></span> bajar</li>
+          <li><span><kbd>Space</kbd></span> caída instantánea</li>
+          <li><span><kbd>P</kbd><kbd>Esc</kbd></span> pausa / reanudar</li>
+          <li><span><kbd>&uarr;</kbd><kbd>&darr;</kbd><kbd>Enter</kbd></span> navegar menú</li>
+        </ul>
+        <div class="pm-item pm-level" data-action="level" tabindex="0" role="group" aria-label="Nivel inicial">
+          <span class="pm-level-label">Nivel inicial</span>
+          <span class="pm-level-control">
+            <button type="button" class="pm-level-btn" data-delta="-1" tabindex="-1" aria-label="Bajar nivel inicial">&minus;</button>
+            <span id="pm-level-value" class="pm-level-value" aria-live="polite">1</span>
+            <button type="button" class="pm-level-btn" data-delta="1" tabindex="-1" aria-label="Subir nivel inicial">+</button>
+          </span>
+        </div>
+        <p class="pm-hint">El nivel inicial se aplica al reiniciar</p>
+      </div>
+    </div>
   </div>
 
+  <script src="pause-menu.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
