@@ -33,6 +33,7 @@ Three files, no framework, no bundler:
 | Speed | `dropInterval = max(100, 1000 − (level−1) × 90)` ms; level = `floor(lines/10) + 1` |
 | Ghost piece | `ghostY()` — projects current piece down until collision; drawn at `globalAlpha = 0.2` |
 | State flags | `paused`, `gameOver`, `animId` (RAF handle) |
+| Skins | `SKINS` — `{ label, colors, drawBlock(ctx, px, py, size, color) }` per skin (retro, neon, pastel, pixel); `applySkin(key)` swaps `skin`/`COLORS`, sets `body.skin-<key>` and redraws; persisted in `localStorage['tetris-skin']` |
 
 ### Game flow
 
@@ -40,4 +41,4 @@ Three files, no framework, no bundler:
 
 ## Tunable constants (top of game.js)
 
-`COLS` (10), `ROWS` (20), `BLOCK` (30 px), `COLORS` (array indexed 1–7), `LINE_SCORES`. If you change `COLS`/`ROWS`/`BLOCK`, update the canvas `width`/`height` attributes in `index.html` to match (`COLS×BLOCK` and `ROWS×BLOCK`).
+`COLS` (10), `ROWS` (20), `BLOCK` (30 px), per-skin `colors` arrays in `SKINS` (indexed 1–8; `COLORS` points at the active one), `LINE_SCORES`. If you change `COLS`/`ROWS`/`BLOCK`, update the canvas `width`/`height` attributes in `index.html` to match (`COLS×BLOCK` and `ROWS×BLOCK`).
