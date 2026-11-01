@@ -160,6 +160,7 @@ function updateHUD() {
 
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
+  if (window.Skins && Skins.drawBlock(context, x, y, colorIndex, size, alpha)) return; // [skins]
   const color = COLORS[colorIndex];
   context.globalAlpha = alpha ?? 1;
   context.fillStyle = color;
@@ -171,7 +172,8 @@ function drawBlock(context, x, y, colorIndex, size, alpha) {
 }
 
 function drawGrid() {
-  ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--grid-line').trim();
+  ctx.strokeStyle = window.Skins ? Skins.gridColor() // [skins]
+    : getComputedStyle(document.body).getPropertyValue('--grid-line').trim();
   ctx.lineWidth = 0.5;
   for (let c = 1; c < COLS; c++) {
     ctx.beginPath();
@@ -189,12 +191,15 @@ function drawGrid() {
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  fillSkinBackground(ctx, canvas); // [skins]
   drawGrid();
 
   // board
   for (let r = 0; r < ROWS; r++)
     for (let c = 0; c < COLS; c++)
       drawBlock(ctx, c, r, board[r][c], BLOCK);
+
+  if (gameOver) return; // [skins] redibujo tras game over: sin pieza activa ni fantasma
 
   // ghost
   const gy = ghostY();
@@ -212,6 +217,7 @@ function draw() {
 function drawNext() {
   const NB = 30;
   nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+  fillSkinBackground(nextCtx, nextCanvas); // [skins]
   const shape = next.shape;
   const offX = Math.floor((4 - shape[0].length) / 2);
   const offY = Math.floor((4 - shape.length) / 2);
@@ -219,6 +225,21 @@ function drawNext() {
     for (let c = 0; c < shape[r].length; c++)
       drawBlock(nextCtx, offX + c, offY + r, shape[r][c], NB);
 }
+
+// [skins] fondo del canvas según la skin activa (null = transparente → --canvas-bg)
+function fillSkinBackground(context, cvs) {
+  const bg = window.Skins && Skins.background();
+  if (!bg) return;
+  context.fillStyle = bg;
+  context.fillRect(0, 0, cvs.width, cvs.height);
+}
+
+// [skins] redibuja aunque el loop esté detenido (pausa / game over)
+function redrawSkin() {
+  if (board && current) draw();
+  if (next) drawNext();
+}
+if (window.Skins) Skins.onChange(redrawSkin);
 
 function endGame() {
   gameOver = true;
@@ -327,6 +348,7 @@ themeToggle.addEventListener('click', () => {
   const isLight = !document.body.classList.contains('light-mode');
   applyTheme(isLight);
   localStorage.setItem('tetris-theme', isLight ? 'light' : 'dark');
+  redrawSkin(); // [skins] colores de fondo/rejilla dependen del modo
 });
 
 init();
