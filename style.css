@@ -273,6 +273,7 @@ body.skin-pixel #next-canvas {
   border-radius: 0;
   border-width: 3px;
   image-rendering: pixelated;
+}
 /* ==== highscores ==== */
 #hs-gameover.hidden,
 #hs-entry.hidden { display: none; }
