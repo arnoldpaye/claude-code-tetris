@@ -43,6 +43,7 @@ const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
+let combo = 0, maxCombo = 0; // [highscores] combo actual y máximo de la partida
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -112,6 +113,8 @@ function clearLines() {
     dropInterval = Math.max(100, 1000 - (level - 1) * 90);
     updateHUD();
   }
+  // [highscores] combo = bloqueos consecutivos que limpian al menos una línea
+  if (cleared) { combo++; maxCombo = Math.max(maxCombo, combo); } else { combo = 0; }
 }
 
 function ghostY() {
@@ -247,6 +250,7 @@ function endGame() {
   overlayTitle.textContent = 'GAME OVER';
   overlayScore.textContent = `Puntuación: ${score.toLocaleString()}`;
   overlay.classList.remove('hidden');
+  HighScores.onGameOver({ score, lines, level, combo: maxCombo }); // [highscores]
 }
 
 function togglePause() {
@@ -289,6 +293,8 @@ function init() {
   gameOver = false;
   dropInterval = 1000;
   dropAccum = 0;
+  combo = 0; maxCombo = 0; // [highscores]
+  HighScores.onGameStart(); // [highscores]
   lastTime = performance.now();
   next = randomPiece();
   spawn();
@@ -299,6 +305,7 @@ function init() {
 }
 
 document.addEventListener('keydown', e => {
+  if (HighScores.handleKey(e)) return; // [highscores] input de nombre / pantalla de inicio
   if (e.code === 'KeyP') { togglePause(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
@@ -351,4 +358,4 @@ themeToggle.addEventListener('click', () => {
   redrawSkin(); // [skins] colores de fondo/rejilla dependen del modo
 });
 
-init();
+HighScores.showStartScreen(init); // [highscores] el juego empieza con "Jugar" o Enter

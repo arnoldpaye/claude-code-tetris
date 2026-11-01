@@ -62,12 +62,35 @@
       <div class="overlay-box">
         <p id="overlay-title">GAME OVER</p>
         <p id="overlay-score"></p>
+        <div id="hs-gameover" class="hs-panel hidden">
+          <div id="hs-entry" class="hs-entry hidden">
+            <p id="hs-entry-msg" class="hs-entry-msg"></p>
+            <div class="hs-entry-row">
+              <input id="hs-name" type="text" maxlength="12" placeholder="Tu nombre" autocomplete="off" spellcheck="false" />
+              <button id="hs-save-btn" class="hs-btn hs-btn-primary">Guardar</button>
+            </div>
+          </div>
+          <span class="label">RÉCORDS</span>
+          <div id="hs-gameover-table"></div>
+          <button class="hs-reset-btn hs-btn hs-btn-secondary">Borrar récords</button>
+        </div>
         <button id="restart-btn">Reiniciar</button>
+      </div>
+    </div>
+
+    <div id="start-screen" class="overlay hidden">
+      <div class="overlay-box hs-panel">
+        <p class="hs-start-title">RÉCORDS</p>
+        <div id="hs-start-table"></div>
+        <button id="play-btn" class="hs-btn hs-btn-primary">Jugar</button>
+        <p class="hs-hint">Pulsa <kbd>Enter</kbd> para empezar</p>
+        <button class="hs-reset-btn hs-btn hs-btn-secondary">Borrar récords</button>
       </div>
     </div>
   </div>
 
   <script src="skins.js"></script>
+  <script src="highscores.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
