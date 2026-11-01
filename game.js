@@ -310,14 +310,12 @@ function init() {
 }
 
 document.addEventListener('keydown', e => {
+  if (HighScores.handleKey(e)) return; // [highscores] input de nombre / pantalla de inicio
   // [pause-menu] P/Escape abren o cierran el menú; con el menú abierto el juego no recibe teclas
   if (e.code === 'KeyP' || e.code === 'Escape') { e.preventDefault(); togglePause(); return; }
   if (paused) { if (PauseMenu.isOpen()) PauseMenu.handleKey(e); return; }
   if (gameOver) return;
   if (PauseMenu.shouldSuppress(e)) { e.preventDefault(); return; }
-  if (HighScores.handleKey(e)) return; // [highscores] input de nombre / pantalla de inicio
-  if (e.code === 'KeyP') { togglePause(); return; }
-  if (paused || gameOver) return;
   switch (e.code) {
     case 'ArrowLeft':
       if (!collide(current.shape, current.x - 1, current.y)) current.x--;
