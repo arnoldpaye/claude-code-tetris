@@ -44,6 +44,7 @@ const restartBtn = document.getElementById('restart-btn');
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 let startLevel = 1; // [pause-menu] nivel con el que empezó la partida actual
+let combo = 0, maxCombo = 0; // [highscores] combo actual y máximo de la partida
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -113,6 +114,8 @@ function clearLines() {
     dropInterval = Math.max(100, 1000 - (level - 1) * 90);
     updateHUD();
   }
+  // [highscores] combo = bloqueos consecutivos que limpian al menos una línea
+  if (cleared) { combo++; maxCombo = Math.max(maxCombo, combo); } else { combo = 0; }
 }
 
 function ghostY() {
@@ -161,6 +164,7 @@ function updateHUD() {
 
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
+  if (window.Skins && Skins.drawBlock(context, x, y, colorIndex, size, alpha)) return; // [skins]
   const color = COLORS[colorIndex];
   context.globalAlpha = alpha ?? 1;
   context.fillStyle = color;
@@ -172,7 +176,8 @@ function drawBlock(context, x, y, colorIndex, size, alpha) {
 }
 
 function drawGrid() {
-  ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--grid-line').trim();
+  ctx.strokeStyle = window.Skins ? Skins.gridColor() // [skins]
+    : getComputedStyle(document.body).getPropertyValue('--grid-line').trim();
   ctx.lineWidth = 0.5;
   for (let c = 1; c < COLS; c++) {
     ctx.beginPath();
@@ -190,12 +195,15 @@ function drawGrid() {
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  fillSkinBackground(ctx, canvas); // [skins]
   drawGrid();
 
   // board
   for (let r = 0; r < ROWS; r++)
     for (let c = 0; c < COLS; c++)
       drawBlock(ctx, c, r, board[r][c], BLOCK);
+
+  if (gameOver) return; // [skins] redibujo tras game over: sin pieza activa ni fantasma
 
   // ghost
   const gy = ghostY();
@@ -213,6 +221,7 @@ function draw() {
 function drawNext() {
   const NB = 30;
   nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+  fillSkinBackground(nextCtx, nextCanvas); // [skins]
   const shape = next.shape;
   const offX = Math.floor((4 - shape[0].length) / 2);
   const offY = Math.floor((4 - shape.length) / 2);
@@ -221,12 +230,28 @@ function drawNext() {
       drawBlock(nextCtx, offX + c, offY + r, shape[r][c], NB);
 }
 
+// [skins] fondo del canvas según la skin activa (null = transparente → --canvas-bg)
+function fillSkinBackground(context, cvs) {
+  const bg = window.Skins && Skins.background();
+  if (!bg) return;
+  context.fillStyle = bg;
+  context.fillRect(0, 0, cvs.width, cvs.height);
+}
+
+// [skins] redibuja aunque el loop esté detenido (pausa / game over)
+function redrawSkin() {
+  if (board && current) draw();
+  if (next) drawNext();
+}
+if (window.Skins) Skins.onChange(redrawSkin);
+
 function endGame() {
   gameOver = true;
   cancelAnimationFrame(animId);
   overlayTitle.textContent = 'GAME OVER';
   overlayScore.textContent = `Puntuación: ${score.toLocaleString()}`;
   overlay.classList.remove('hidden');
+  HighScores.onGameOver({ score, lines, level, combo: maxCombo }); // [highscores]
 }
 
 function togglePause() {
@@ -272,6 +297,8 @@ function init() {
   gameOver = false;
   dropInterval = Math.max(100, 1000 - (level - 1) * 90);
   dropAccum = 0;
+  combo = 0; maxCombo = 0; // [highscores]
+  HighScores.onGameStart(); // [highscores]
   lastTime = performance.now();
   next = randomPiece();
   spawn();
@@ -288,6 +315,9 @@ document.addEventListener('keydown', e => {
   if (paused) { if (PauseMenu.isOpen()) PauseMenu.handleKey(e); return; }
   if (gameOver) return;
   if (PauseMenu.shouldSuppress(e)) { e.preventDefault(); return; }
+  if (HighScores.handleKey(e)) return; // [highscores] input de nombre / pantalla de inicio
+  if (e.code === 'KeyP') { togglePause(); return; }
+  if (paused || gameOver) return;
   switch (e.code) {
     case 'ArrowLeft':
       if (!collide(current.shape, current.x - 1, current.y)) current.x--;
@@ -338,6 +368,7 @@ themeToggle.addEventListener('click', () => {
   const isLight = !document.body.classList.contains('light-mode');
   applyTheme(isLight);
   localStorage.setItem('tetris-theme', isLight ? 'light' : 'dark');
+  redrawSkin(); // [skins] colores de fondo/rejilla dependen del modo
 });
 
-init();
+HighScores.showStartScreen(init); // [highscores] el juego empieza con "Jugar" o Enter
