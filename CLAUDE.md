@@ -32,14 +32,16 @@ Three files, no framework, no bundler:
 | Scoring | `LINE_SCORES = [0,100,300,500,800]` × `level`; hard drop +2/cell, soft drop +1/row |
 | Speed | `dropInterval = max(100, 1000 − (level−1) × 90)` ms; level = `startLevelOfGame + floor(lines/10)` (`speedFor(level)`) |
 | Ghost piece | `ghostY()` — projects current piece down until collision; drawn at `globalAlpha = 0.2` |
-| State flags | `paused`, `gameOver`, `animId` (RAF handle) |
+| State flags | `paused`, `gameOver`, `started`, `animId` (RAF handle) |
 | Pause menu | `pauseGame()` / `resumeGame()` / `restartGame()`; keyboard nav in `handleMenuKey()`; `menuView`, `menuIndex` |
 | Start level | `startLevel` (menu choice, persisted in `localStorage['tetris-start-level']`, 1–`MAX_START_LEVEL`); copied to `startLevelOfGame` in `init()` |
 | Input lock | keys pressed while paused go into `blockedKeys` and are ignored by the game until `keyup` |
+| Records | `records` `{ scores[≤5], bestCombo, maxLines }` en `localStorage['tetris-records']`; `rankFor()`, `renderRecords()`, `commitPendingRecord()`, `resetRecords()` |
+| Combo | `combo` = piezas consecutivas que limpian líneas; `maxCombo` por partida |
 
 ### Game flow
 
-`init()` → `spawn()` → `requestAnimationFrame(loop)`. Each frame: accumulate dt → auto-drop or `lockPiece()` → `draw()`. `lockPiece()` = `merge()` + `clearLines()` + `spawn()`. If `spawn()` immediately collides → `endGame()`.
+`showStartScreen()` (overlay con records) → Jugar/Enter → `startGame()` → `init()` → `spawn()` → `requestAnimationFrame(loop)`. Each frame: accumulate dt → auto-drop or `lockPiece()` → `draw()`. `lockPiece()` = `merge()` + `clearLines()` + `spawn()`. If `spawn()` immediately collides → `endGame()`, que actualiza mejor combo/líneas máx. y, si la puntuación entra en el top 5, pide el nombre (`pendingRecord`, resaltado en la tabla).
 
 ## Tunable constants (top of game.js)
 
