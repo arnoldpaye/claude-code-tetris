@@ -42,10 +42,42 @@
             <li><kbd>↑</kbd> rotar</li>
             <li><kbd>↓</kbd> bajar</li>
             <li><kbd>Space</kbd> caída</li>
-            <li><kbd>P</kbd> pausa</li>
+            <li><kbd>P</kbd><kbd>Esc</kbd> pausa</li>
           </ul>
         </div>
       </aside>
+    </div>
+
+    <div id="pause-menu" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+      <div class="overlay-box pause-box">
+        <p id="pause-title" class="pause-title">PAUSA</p>
+
+        <div id="pause-main" class="pause-view">
+          <button class="menu-btn" data-action="resume">Reanudar</button>
+          <button class="menu-btn" data-action="restart">Reiniciar</button>
+          <button class="menu-btn" data-action="controls">Ver controles</button>
+          <div class="menu-level" data-action="level" role="spinbutton"
+               aria-label="Nivel inicial" aria-valuemin="1" aria-valuemax="10">
+            <span class="menu-level-label">Nivel inicial</span>
+            <button class="level-arrow" data-step="-1" tabindex="-1" aria-label="Bajar nivel">&#9664;</button>
+            <span id="start-level-value" class="level-value">1</span>
+            <button class="level-arrow" data-step="1" tabindex="-1" aria-label="Subir nivel">&#9654;</button>
+          </div>
+          <p class="menu-hint">Se aplica al reiniciar o en la próxima partida</p>
+        </div>
+
+        <div id="pause-controls" class="pause-view hidden">
+          <ul class="menu-controls">
+            <li><span><kbd>←</kbd><kbd>→</kbd></span> Mover</li>
+            <li><span><kbd>↑</kbd><kbd>X</kbd></span> Rotar</li>
+            <li><span><kbd>↓</kbd></span> Soft drop</li>
+            <li><span><kbd>Space</kbd></span> Hard drop</li>
+            <li><span><kbd>P</kbd><kbd>Esc</kbd></span> Pausa / menú</li>
+          </ul>
+          <p class="menu-hint">En el menú: <kbd>↑</kbd><kbd>↓</kbd> navegar · <kbd>Enter</kbd> elegir · <kbd>←</kbd><kbd>→</kbd> nivel</p>
+          <button class="menu-btn" data-action="back">Volver</button>
+        </div>
+      </div>
     </div>
 
     <div id="overlay" class="overlay hidden">
