@@ -38,6 +38,7 @@ Three files, no framework, no bundler:
 | Input lock | keys pressed while paused go into `blockedKeys` and are ignored by the game until `keyup` |
 | Records | `records` `{ scores[≤5], bestCombo, maxLines }` en `localStorage['tetris-records']`; `rankFor()`, `renderRecords()`, `commitPendingRecord()`, `resetRecords()` |
 | Combo | `combo` = piezas consecutivas que limpian líneas; `maxCombo` por partida |
+| Skins | `SKINS` (`retro`, `neon`, `pastel`, `pixel`) — each has `colors`, `grid`, `drawBlock`; `applySkin(name)` swaps `skin`/`COLORS`, toggles `body.skin-*`, redraws; persisted in `localStorage['tetris-skin']` |
 
 ### Game flow
 
@@ -45,4 +46,4 @@ Three files, no framework, no bundler:
 
 ## Tunable constants (top of game.js)
 
-`COLS` (10), `ROWS` (20), `BLOCK` (30 px), `COLORS` (array indexed 1–7), `LINE_SCORES`. If you change `COLS`/`ROWS`/`BLOCK`, update the canvas `width`/`height` attributes in `index.html` to match (`COLS×BLOCK` and `ROWS×BLOCK`).
+`COLS` (10), `ROWS` (20), `BLOCK` (30 px), `SKINS[*].colors` (arrays indexed 1–8; `COLORS` points at the active skin's palette), `LINE_SCORES`. If you change `COLS`/`ROWS`/`BLOCK`, update the canvas `width`/`height` attributes in `index.html` to match (`COLS×BLOCK` and `ROWS×BLOCK`).
