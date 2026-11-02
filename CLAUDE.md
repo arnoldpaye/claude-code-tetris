@@ -32,11 +32,13 @@ Three files, no framework, no bundler:
 | Scoring | `LINE_SCORES = [0,100,300,500,800]` × `level`; hard drop +2/cell, soft drop +1/row |
 | Speed | `dropInterval = max(100, 1000 − (level−1) × 90)` ms; level = `floor(lines/10) + 1` |
 | Ghost piece | `ghostY()` — projects current piece down until collision; drawn at `globalAlpha = 0.2` |
-| State flags | `paused`, `gameOver`, `animId` (RAF handle) |
+| State flags | `paused`, `gameOver`, `started`, `animId` (RAF handle) |
+| Records | `records` `{ scores[≤5], bestCombo, maxLines }` en `localStorage['tetris-records']`; `rankFor()`, `renderRecords()`, `commitPendingRecord()`, `resetRecords()` |
+| Combo | `combo` = piezas consecutivas que limpian líneas; `maxCombo` por partida |
 
 ### Game flow
 
-`init()` → `spawn()` → `requestAnimationFrame(loop)`. Each frame: accumulate dt → auto-drop or `lockPiece()` → `draw()`. `lockPiece()` = `merge()` + `clearLines()` + `spawn()`. If `spawn()` immediately collides → `endGame()`.
+`showStartScreen()` (overlay con records) → Jugar/Enter → `startGame()` → `init()` → `spawn()` → `requestAnimationFrame(loop)`. Each frame: accumulate dt → auto-drop or `lockPiece()` → `draw()`. `lockPiece()` = `merge()` + `clearLines()` + `spawn()`. If `spawn()` immediately collides → `endGame()`, que actualiza mejor combo/líneas máx. y, si la puntuación entra en el top 5, pide el nombre (`pendingRecord`, resaltado en la tabla).
 
 ## Tunable constants (top of game.js)
 
